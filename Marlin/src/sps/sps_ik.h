@@ -1,0 +1,4 @@
+#pragma once
+#include "sps_types.h"
+#include <math.h>
+namespace sps{struct JointState{real j[6];int n;};struct IKinematics{virtual ~IKinematics(){};virtual bool IK(const Pose&,JointState&)=0;};struct IK3T:IKinematics{bool IK(const Pose&t,JointState&o)override{o.n=3;o.j[0]=t.p.x;o.j[1]=t.p.y;o.j[2]=t.p.z;return true;}};static inline void quat_to_AB(const Quat&q,real&Adeg,real&Bdeg){real ww=q.w*q.w,xx=q.x*q.x,yy=q.y*q.y,zz=q.z*q.z;real m00=ww+xx-yy-zz;real m01=2*(q.x*q.y - q.w*q.z);real m02=2*(q.x*q.z + q.w*q.y);real m12=2*(q.y*q.z - q.w*q.x);real m22=ww-xx-yy+zz;real A=atan2(m01,m00);real B=atan2(-m02,sqrt(m12*m12+m22*m22));Adeg=A*180.0/M_PI;Bdeg=B*180.0/M_PI;}struct IK3T2R:IKinematics{bool IK(const Pose&t,JointState&o)override{o.n=5;o.j[0]=t.p.x;o.j[1]=t.p.y;o.j[2]=t.p.z;real A,B;quat_to_AB(t.q,A,B);o.j[3]=A;o.j[4]=B;return true;}};}
